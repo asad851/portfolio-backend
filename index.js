@@ -3,6 +3,8 @@ const app = express();
 import cors from "cors";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 dotenv.config();
 app.use(
   cors({
@@ -12,6 +14,11 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Directory where your PDFs are stored
+const PDF_FILE_PATH = path.join(__dirname, "pdfs", "AsadResume.pdf");
 app.post("/send-email", async (req, res) => {
   try {
     let { firstName, lastName, email, phone, message } = req.body;
@@ -92,6 +99,14 @@ app.post("/send-email", async (req, res) => {
   }
 });
 
+app.get("/download", (req, res) => {
+  res.download(PDF_FILE_PATH, "AsadResume.pdf", (err) => {
+    if (err) {
+      console.error("Error downloading file:", err);
+      res.status(500).json({ error: "Failed to download file" });
+    }
+  });
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   //   console.log(`Server running on port ${PORT}`);
